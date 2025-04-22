@@ -3,8 +3,7 @@ import logfire
 from craft.routers import user, auth
 from craft.config import CONFIG
 
-
-app = FastAPI()
+app = FastAPI(version=CONFIG.api_version)
 
 logfire.configure(
     token=CONFIG.logfire_token,
@@ -18,7 +17,9 @@ logfire.instrument_fastapi(app, capture_headers=True)
 app.include_router(user.router)
 app.include_router(auth.router)
 
-if __name__ == "__main__":
+
+def run():
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("craft.main:app", host=CONFIG.api_host,
+                port=CONFIG.api_port, reload=True)

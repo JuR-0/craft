@@ -1,6 +1,8 @@
 from beanie import Document
 from pydantic import BaseModel, Field
-from datetime import datetime
+import datetime
+from beanie import before_event, Insert
+from craft.auth.password import hash_password
 
 
 class User(BaseModel):
@@ -10,7 +12,10 @@ class User(BaseModel):
     password: str = Field(min_length=8)
     dob: datetime.date | None = None
 
+    @before_event(Insert)
+    def capitalize_name(self):
+        self.password = hash_password(self.password)
+
 
 class DbUser(User, Document):
-    hashed_password: str
     disabled: bool = False
